@@ -10,7 +10,7 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 
 #[wasm_bindgen]
-pub fn fibonacci(num: u64) -> u64 {
+pub fn fibonacci(num: u32) -> u32 {
     match num {
         1 | 2 => 1,
         _ => fibonacci(num - 1) + fibonacci(num - 2),
