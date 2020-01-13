@@ -1,11 +1,25 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset="utf-8">
+    <meta charset="utf-8" />
     <title>Hello wasm-pack!</title>
   </head>
   <body>
-    <noscript>This page contains webassembly and javascript content, please enable javascript in your browser.</noscript>
+    <noscript
+      >This page contains webassembly and javascript content, please enable
+      javascript in your browser.</noscript
+    >
+    <canvas class="canvas-scenery"></canvas>
+    <h2 class="fps-num">FPS: <span>NAN</span></h2>
+    <input type="radio" value="0" checked name="render"/>
+    <span class="label">不开启渲染</span>
+    <br />
+    <input type="radio" value="1" name="render"/>
+    <span class="label">wasm渲染</span>
+    <br />
+    <input type="radio" value="2" name="render"/>
+    <span class="label">js渲染</span>
+    <video class="video" src="./test.mp4" style="display: none;" autoplay="true" loop="true"></video>
     <script src="./bootstrap.js"></script>
   </body>
 </html>
