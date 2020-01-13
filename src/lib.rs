@@ -8,12 +8,11 @@ use wasm_bindgen::prelude::*;
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
-#[wasm_bindgen]
-extern {
-    fn alert(s: &str);
-}
 
 #[wasm_bindgen]
-pub fn greet() {
-    alert("Hello, kernel-calculationffffff!");
+pub fn fibonacci(num: u64) -> u64 {
+    match num {
+        1 | 2 => 1,
+        _ => fibonacci(num - 1) + fibonacci(num - 2),
+    }
 }

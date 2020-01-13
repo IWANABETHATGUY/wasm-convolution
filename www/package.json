@@ -30,6 +30,6 @@
     "copy-webpack-plugin": "^5.0.0"
   },
   "dependencies": {
-    ""
+    "kernel-calculation": "file:../pkg"
   }
 }
