@@ -1,5 +1,5 @@
-import { memory } from 'kernel-calculation/kernel_calculation_bg';
-import {convert_js_filter as convertWasmFilter} from 'kernel-calculation'
+import {  } from 'kernel-calculation/kernel_calculation_bg';
+import {convert_js_filter as convertWasmFilter,fibonacci } from 'kernel-calculation'
 const canvas = document.querySelector('.canvas-scenery');
 const video = document.querySelector('.video');
 const fpsNum = document.querySelector('.fps-num');
@@ -19,6 +19,7 @@ const kernel = [
   [1, -5, 1],
   [1, 1, 1],
 ];
+let kernelFlat = kernel.flat()
 const divisor = 4;
 
 const ctx = canvas.getContext('2d');
@@ -76,7 +77,7 @@ function filterJs(pixels, clientWidth, clientHeight) {
   );
 }
 function filterWasm(pixels, clientWidth, clientHeight) {
-  return convertWasmFilter(pixels.data, clientWidth, clientHeight, kernel.flat(), divisor, 3, 3)
+  return convertWasmFilter(pixels.data, clientWidth, clientHeight, kernelFlat, divisor, 3, 3)
 }
 function draw() {
   ctx.drawImage(video, 0, 0);
@@ -99,3 +100,22 @@ video.onloadeddata = function() {
 
   getFpsNum();
 };
+
+
+function fibonacciJs(n) {
+  if (n == 1 || n == 2){
+    return 1
+  }
+  return fibonacciJs(n - 1) + fibonacciJs(n - 2)
+}
+
+console.time('js')
+let b =  fibonacciJs(40)
+console.log(b)
+console.timeEnd('js')
+
+
+console.time('wasm')
+let a = fibonacci(40)
+console.log(a)
+console.timeEnd('wasm')

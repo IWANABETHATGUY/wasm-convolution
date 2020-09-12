@@ -1,4 +1,4 @@
-mod utils;
+#![feature(clamp)]
 
 use wasm_bindgen::prelude::*;
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
@@ -45,40 +45,48 @@ pub fn convert_js_filter(
     divisor: usize,
     k_width: usize,
     k_height: usize,
-) -> usize {
+) {
     let half = (k_width / 2) as usize;
     let mut px: usize;
-    for y in half..height - half {
-        for x in half..width - half {
-            px = (y * width + x) * 4;
-            let mut r = 0;
-            let mut g = 0;
-            let mut b = 0;
+    let mut r;
+    let mut g;
+    let mut b;
+    let divisor = divisor as i32;
+    let mut cpx;
+    let mut kernel_value;
+    for y in 1..(height - half) {
+        for x in 1..(width - half) {
+            r = 0;
+            g = 0;
+            b = 0;
             for i in 0..k_height {
+                let i_k_width = i * k_width;
+                let y_extract_half_mul_i = (y + i - half) * width;
+                let x_extract_half = x - half;
                 for j in 0..k_width {
-                    let kernel_value = kernel[(i * k_width + j) as usize];
-                    let cpx = ((y + i - half) * width + (x + j - half)) * 4;
-                    r += data[cpx] as i32 * kernel_value;
-                    g += data[cpx + 1] as i32 * kernel_value;
-                    b += data[cpx + 2] as i32 * kernel_value;
+                    kernel_value = unsafe { *kernel.get_unchecked(i_k_width + j) };
+                    cpx = (y_extract_half_mul_i + (x_extract_half + j)) * 4;
+                    unsafe {
+                        r += *data.get_unchecked(cpx) as i32 * kernel_value;
+                        g += *data.get_unchecked(cpx + 1) as i32 * kernel_value;
+                        b += *data.get_unchecked(cpx + 2) as i32 * kernel_value;
+                    }
                 }
             }
-            data[px] = match r / divisor as i32 {
-                a @ 0..=255 => a,
-                256..=std::i32::MAX => 255,
-                _ => 0,
-            } as u8;
-            data[px + 1] = match g / divisor as i32 {
-                a @ 0..=255 => a,
-                256..=std::i32::MAX => 255,
-                _ => 0,
-            } as u8;
-            data[px + 2] = match b / divisor as i32 {
-                a @ 0..=255 => a,
-                256..=std::i32::MAX => 255,
-                _ => 0,
-            } as u8;
+            px = (y * width + x) * 4;
+            unsafe {
+                *data.get_unchecked_mut(px) = (r / divisor).clamp(0, 255) as u8;
+                *data.get_unchecked_mut(px + 1) = (g / divisor).clamp(0, 255) as u8;
+                *data.get_unchecked_mut(px + 2) = (b / divisor).clamp(0, 255) as u8;
+            }
         }
     }
-    1
+}
+
+#[wasm_bindgen]
+pub fn fibonacci(v: i32) -> i32 {
+    match v {
+        1 | 2 => 1,
+        _ => fibonacci(v - 1) + fibonacci(v - 2),
+    }
 }
