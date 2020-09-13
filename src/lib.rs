@@ -1,12 +1,14 @@
 #![feature(clamp)]
 
 use wasm_bindgen::prelude::*;
+use web_sys::console;
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
 // allocator.
 #[cfg(feature = "wee_alloc")]
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
+// use web_sys::console;
 // function convertJsFilter(data, width, height, kernel, divisor) {
 //     const kw = kernel[0].length;
 //     const kh = kernel.length;
@@ -36,7 +38,23 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 //     }
 //     return data;
 //   }
-#[wasm_bindgen]
+// pub struct Timer<'a> {
+//     name: &'a str,
+// }
+
+// impl<'a> Timer<'a> {
+//     pub fn new(name: &'a str) -> Timer<'a> {
+//         console::time_with_label(name);
+//         Timer { name }
+//     }
+// }
+
+// impl<'a> Drop for Timer<'a> {
+//     fn drop(&mut self) {
+//         console::time_end_with_label(self.name);
+//     }
+// }
+// #[wasm_bindgen]
 pub fn convert_js_filter(
     data: &mut [u8],
     width: usize,
@@ -46,6 +64,7 @@ pub fn convert_js_filter(
     k_width: usize,
     k_height: usize,
 ) {
+    // let _timer = Timer::new("convert_wasm_filter");
     let half = (k_width / 2) as usize;
     let mut px: usize;
     let mut r;
@@ -54,8 +73,10 @@ pub fn convert_js_filter(
     let divisor = divisor as i32;
     let mut cpx;
     let mut kernel_value;
-    for y in 1..(height - half) {
-        for x in 1..(width - half) {
+    let height_extract_half = height - half;
+    let width_extract_half = width - half;
+    for y in 1..height_extract_half {
+        for x in 1..width_extract_half {
             r = 0;
             g = 0;
             b = 0;
@@ -67,7 +88,7 @@ pub fn convert_js_filter(
                     kernel_value = unsafe { *kernel.get_unchecked(i_k_width + j) };
                     cpx = (y_extract_half_mul_i + (x_extract_half + j)) * 4;
                     unsafe {
-                        r += *data.get_unchecked(cpx) as i32 * kernel_value;
+                        r += *data.get_unchecked(cpx) as i32  * kernel_value;
                         g += *data.get_unchecked(cpx + 1) as i32 * kernel_value;
                         b += *data.get_unchecked(cpx + 2) as i32 * kernel_value;
                     }
@@ -75,18 +96,22 @@ pub fn convert_js_filter(
             }
             px = (y * width + x) * 4;
             unsafe {
-                *data.get_unchecked_mut(px) = (r / divisor).clamp(0, 255) as u8;
-                *data.get_unchecked_mut(px + 1) = (g / divisor).clamp(0, 255) as u8;
-                *data.get_unchecked_mut(px + 2) = (b / divisor).clamp(0, 255) as u8;
+                *data.get_unchecked_mut(px) = match r / divisor {
+                    a @ 0..=255 => a,
+                    std::i32::MIN..=-1 => 0,
+                    256..=std::i32::MAX => 255,
+                } as u8;
+                *data.get_unchecked_mut(px + 1) = match g / divisor {
+                    a @ 0..=255 => a,
+                    std::i32::MIN..=-1 => 0,
+                    256..=std::i32::MAX => 255,
+                } as u8;
+                *data.get_unchecked_mut(px + 2) = match b / divisor {
+                    a @ 0..=255 => a,
+                    std::i32::MIN..=-1 => 0,
+                    256..=std::i32::MAX => 255,
+                } as u8;
             }
         }
-    }
-}
-
-#[wasm_bindgen]
-pub fn fibonacci(v: i32) -> i32 {
-    match v {
-        1 | 2 => 1,
-        _ => fibonacci(v - 1) + fibonacci(v - 2),
     }
 }

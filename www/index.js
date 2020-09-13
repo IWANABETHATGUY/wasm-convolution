@@ -85,7 +85,9 @@ function draw() {
   if (type === '1') {
     filterWasm(pixels, clientWidth, clientHeight)
   } else if (type === '2') {
+    console.time('js')
     pixels.data.set(filterJs(pixels, clientWidth, clientHeight));
+    console.timeEnd('js')
   }
   ctx.putImageData(pixels, 0, 0);
 }
@@ -108,14 +110,3 @@ function fibonacciJs(n) {
   }
   return fibonacciJs(n - 1) + fibonacciJs(n - 2)
 }
-
-console.time('js')
-let b =  fibonacciJs(40)
-console.log(b)
-console.timeEnd('js')
-
-
-console.time('wasm')
-let a = fibonacci(40)
-console.log(a)
-console.timeEnd('wasm')
