@@ -54,7 +54,7 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 //         console::time_end_with_label(self.name);
 //     }
 // }
-// #[wasm_bindgen]
+#[wasm_bindgen]
 pub fn convert_js_filter(
     data: &mut [u8],
     width: usize,
